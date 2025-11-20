@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Al-Qur'an Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(to bottom, #4e9af1, #d7e9ff);
+            min-height: 100vh;
+        }
+
+        header {
+            background: #003d73;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        #konten {
+            padding: 20px;
+        }
+
+        .surah {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        .ayat {
+            background: #ffffff;
+            padding: 15px;
+            margin-top: 10px;
+            border-left: 5px solid #005bbb;
+            border-radius: 7px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #003d73;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<header>Al-Qur'an Digital</header>
+
+<div id="konten">Memuat daftar surah...</div>
+
+<footer>Dibuat oleh: (Narendra)</footer>
+
+<script>
+// ===========================
+// 1. TAMPILKAN DAFTAR SURAH
+// ===========================
+function tampilkanDaftarSurah() {
+    fetch("https://equran.id/api/v2/surat")
+        .then(res => res.json())
+        .then(data => {
+            const konten = document.getElementById("konten");
+            konten.innerHTML = "";
+
+            data.data.forEach(surah => {
+                const div = document.createElement("div");
+                div.className = "surah";
+                div.innerHTML = `
+                    <b>${surah.nomor}. ${surah.namaLatin}</b><br>
+                    <small>${surah.tempatTurun} • ${surah.jumlahAyat} ayat</small>
+                `;
+                div.onclick = () => tampilkanAyat(surah.nomor);
+                konten.appendChild(div);
+            });
+        })
+        .catch(err => {
+            document.getElementById("konten").innerHTML = "Gagal memuat API!";
+        });
+}
+
+// ===========================
+// 2. TAMPILKAN AYAT SURAH
+// ===========================
+function tampilkanAyat(no) {
+    fetch("https://equran.id/api/v2/surat/" + no)
+        .then(res => res.json())
+        .then(data => {
+            const surah = data.data;
+            const konten = document.getElementById("konten");
+
+            konten.innerHTML = `
+                <h2>${surah.namaLatin} (${surah.nama})</h2>
+                <button onclick="tampilkanDaftarSurah()">Kembali</button>
+            `;
+
+            surah.ayat.forEach(ayat => {
+                const div = document.createElement("div");
+                div.className = "ayat";
+                div.innerHTML = `
+                    <p style="font-size:22px; text-align:right;">${ayat.teksArab}</p>
+                    <p><b>${ayat.nomorAyat}.</b> ${ayat.teksIndonesia}</p>
+                `;
+                konten.appendChild(div);
+            });
+        });
+}
+
+// mulai pertama kali
+tampilkanDaftarSurah();
+</script>
+
+</body>
+</html>
